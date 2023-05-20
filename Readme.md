@@ -224,4 +224,4 @@ cp git-subtree ~/bin
  * Set `linker='-Clinker=m68k-linux-gcc'`.
  * Set the path to the cross-compiling libgccjit in `gcc_path`.
  * Comment the line: `context.add_command_line_option("-masm=intel");` in src/base.rs.
- * (might not be necessary) Disable the compilation of libstd.so (and possibly libcore.so?).
+ * (might not be necessary) Disable the compilation of libstd.so (and possibly libcore.so?): Remove dylib from build_sysroot/sysroot_src/library/std/Cargo.toml.

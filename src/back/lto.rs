@@ -1,3 +1,17 @@
+// TODO: vérifier si les symbols sont dans les fichiers .ltrans0.ltrans.o.
+// Ils ne sont pas là.
+//
+// FIXME: compile the object files (including the ones from sysroot) directly to the executable to see if this works.
+// TODO TODO TODO: WE'RE MAKING PROGRESS HERE!
+// Compiling with gcc and removing the -r flag compiles correctly!
+// For now, adding these environment variables is needed:
+// COLLECT_GCC=gcc GCC_EXEC_PREFIX=/opt/gcc/lib/gcc/x86_64-pc-linux-gnu
+// I had to copy lto1, crtbegin.o from the system to /opt/…
+// I had to copy liblto_plugin.so to /opt/gcc/lib/gcc
+// I compile a .o as an executable.
+//
+// TODO: you do the command with -v -save-temps and then extract the lto1 line from the output and run that under the debugger
+
 use std::ffi::CString;
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};

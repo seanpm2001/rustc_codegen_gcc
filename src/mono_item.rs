@@ -36,6 +36,9 @@ impl<'gcc, 'tcx> PreDefineMethods<'tcx> for CodegenCx<'gcc, 'tcx> {
         let fn_abi = self.fn_abi_of_instance(instance, ty::List::empty());
         self.linkage.set(base::linkage_to_gcc(linkage));
         let decl = self.declare_fn(symbol_name, &fn_abi);
+        if linkage == Linkage::AvailableExternally {
+            decl.add_attribute(FnAttribute::ExternallyVisible);
+        }
         //let attrs = self.tcx.codegen_fn_attrs(instance.def_id());
 
         attributes::from_fn_attrs(self, decl, instance);
@@ -54,6 +57,13 @@ impl<'gcc, 'tcx> PreDefineMethods<'tcx> for CodegenCx<'gcc, 'tcx> {
         else {
             #[cfg(feature="master")]
             decl.add_attribute(FnAttribute::Visibility(base::visibility_to_gcc(visibility)));
+        }
+
+        if linkage != Linkage::Internal && linkage != Linkage::External {
+            println!("Linkage: {:?}", linkage);
+        }
+        if linkage == Linkage::LinkOnceODR || linkage == Linkage::WeakODR {
+            println!("Function: {}", symbol_name);
         }
 
         // TODO(antoyo): call set_link_section() to allow initializing argc/argv.

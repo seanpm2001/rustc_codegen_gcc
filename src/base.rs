@@ -50,6 +50,7 @@ pub fn global_linkage_to_gcc(linkage: Linkage) -> GlobalKind {
 pub fn linkage_to_gcc(linkage: Linkage) -> FunctionType {
     match linkage {
         Linkage::External => FunctionType::Exported,
+        // TODO: set the attribute externally_visible.
         Linkage::AvailableExternally => FunctionType::Extern,
         Linkage::LinkOnceAny => unimplemented!(),
         Linkage::LinkOnceODR => unimplemented!(),
@@ -87,6 +88,7 @@ pub fn compile_codegen_unit(tcx: TyCtxt<'_>, cgu_name: Symbol, supports_128bit_i
         // Instantiate monomorphizations without filling out definitions yet...
         //let llvm_module = ModuleLlvm::new(tcx, &cgu_name.as_str());
         let context = Context::default();
+        context.add_driver_option("-save-temps");
 
         context.add_command_line_option("-fexceptions");
         context.add_driver_option("-fexceptions");

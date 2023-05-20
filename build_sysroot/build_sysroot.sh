@@ -20,7 +20,7 @@ export RUSTFLAGS="$RUSTFLAGS -Z force-unstable-if-unmarked"
 if [[ "$1" == "--release" ]]; then
     sysroot_channel='release'
     # RUSTFLAGS="$RUSTFLAGS -Zmir-opt-level=3" cargo build -v --target $TARGET_TRIPLE --release
-    RUSTFLAGS="$RUSTFLAGS -Zmir-opt-level=3 -C embed-bitcode=yes -C lto=no " cargo build -v --target $TARGET_TRIPLE --release
+    RUSTFLAGS="$RUSTFLAGS -Zmir-opt-level=3 -C embed-bitcode=yes -C lto=no " cargo build --target $TARGET_TRIPLE --release
 else
     sysroot_channel='debug'
     cargo build --target $TARGET_TRIPLE --features compiler_builtins/c

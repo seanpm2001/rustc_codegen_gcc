@@ -20,4 +20,4 @@ fi
 cmd=$1
 shift
 
-RUSTDOCFLAGS="$RUSTFLAGS" cargo +${TOOLCHAIN} $cmd $@
+LIBRARY_PATH=/home/bouanto/Ordinateur/Programmation/Projets/gcc-repo/gcc-build/build/gcc GCC_EXEC_PREFIX=/opt/gcc/lib/gcc/x86_64-pc-linux-gnu PATH=$PATH:/opt/gcc/bin RUSTDOCFLAGS="$RUSTFLAGS" cargo +${TOOLCHAIN} $cmd $@

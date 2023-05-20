@@ -49,7 +49,10 @@ pub(crate) unsafe fn codegen(tcx: TyCtxt<'_>, mods: &mut GccContext, _module_nam
         let args: Vec<_> = types.iter().enumerate()
             .map(|(index, typ)| context.new_parameter(None, *typ, &format!("param{}", index)))
             .collect();
+        // FIXME: __rust_alloc is only in ASM form, not in gimple form, in the object file.
         let func = context.new_function(None, FunctionType::Exported, output.unwrap_or(void), &args, name, false);
+        // TODO: it seems that adding ExternallyVisible doesn't help.
+        // func.add_attribute(FnAttribute::ExternallyVisible);
 
         if tcx.sess.target.options.default_hidden_visibility {
             #[cfg(feature="master")]

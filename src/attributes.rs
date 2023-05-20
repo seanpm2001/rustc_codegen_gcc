@@ -112,6 +112,7 @@ pub fn from_fn_attrs<'gcc, 'tcx>(
                 codegen_fn_attrs.inline
             };
         if let Some(attr) = inline_attr(cx, inline) {
+            // TODO TODO TODO: inlining is part of the issue.
             func.add_attribute(attr);
         }
     }
