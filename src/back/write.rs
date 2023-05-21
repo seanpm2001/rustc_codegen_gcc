@@ -21,7 +21,8 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
         let module_name = module.name.clone();
 
         // println!("Module name: {}", module_name);
-        let should_combine_object_files = module_name == "test_rust.3ab6d383-cgu.0";
+        // let should_combine_object_files = module_name == "test_rust.3ab6d383-cgu.0"; // With debug info.
+        let should_combine_object_files = module_name == "test_rust.8bd2b20a-cgu.0";
 
         let module_name = Some(&module_name[..]);
 
@@ -57,8 +58,8 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
                 context.add_command_line_option("-flto");
                 context.add_driver_option("-flto");
                 // TODO: use flto-partition=one?
-                // context.add_command_line_option("-flto-partition=one");
-                // context.add_driver_option("-flto-partition=one");
+                context.add_command_line_option("-flto-partition=one");
+                context.add_driver_option("-flto-partition=one");
                 if should_combine_object_files {
                     unimplemented!(); // TODO: remove this line.
                     context.add_driver_option("-Wl,-r");
@@ -113,8 +114,8 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
                 context.add_command_line_option("-flto");
                 context.add_driver_option("-flto");
                 // TODO: use flto-partition=one?
-                // context.add_command_line_option("-flto-partition=one");
-                // context.add_driver_option("-flto-partition=one");
+                context.add_command_line_option("-flto-partition=one");
+                context.add_driver_option("-flto-partition=one");
                 context.add_command_line_option("-ffat-lto-objects");
                 context.add_driver_option("-ffat-lto-objects");
                 // TODO: Send -plugin/usr/lib/gcc/x86_64-pc-linux-gnu/11.1.0/liblto_plugin.so to linker (this should be done when specifying the appropriate rustc cli argument).
@@ -161,11 +162,11 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
                     context.add_command_line_option("-flto");
                     context.add_driver_option("-flto");
                     // TODO: use flto-partition=one?
-                    // context.add_command_line_option("-flto-partition=one");
-                    // context.add_driver_option("-flto-partition=one");
+                    context.add_command_line_option("-flto-partition=one");
+                    context.add_driver_option("-flto-partition=one");
 
                     // let inner = context.new_child_context();
-                    context.add_driver_option("-v");
+                    // context.add_driver_option("-v");
                     context.add_driver_option("-Wl,-r");
                     context.add_driver_option("-nostdlib");
                     context.add_driver_option("-fuse-linker-plugin");
