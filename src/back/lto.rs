@@ -1,3 +1,7 @@
+// FIXME: if any of object files in incremental link cannot be used for link-time optimization, the linker plugin issues a warning and uses nolto-rel.
+// => Maybe it's the symbol file?
+// => There's a least the rust_alloc file.
+//
 // TODO: vérifier si les symbols sont dans les fichiers .ltrans0.ltrans.o.
 // Ils ne sont pas là.
 //
