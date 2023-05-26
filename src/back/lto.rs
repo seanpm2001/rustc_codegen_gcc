@@ -10,6 +10,7 @@
 use std::ffi::CString;
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};
+use std::sync::atomic::Ordering;
 
 use gccjit::OutputKind;
 use object::read::archive::ArchiveFile;
@@ -28,7 +29,7 @@ use tempfile::{TempDir, tempdir};
 
 use crate::back::write::save_temp_bitcode;
 use crate::errors::{
-    DynamicLinkingWithLTO, LoadBitcode, LtoBitcodeFromRlib, LtoDisallowed, LtoDylib,
+    DynamicLinkingWithLTO, LtoBitcodeFromRlib, LtoDisallowed, LtoDylib,
 };
 use crate::{GccCodegenBackend, GccContext};
 
@@ -250,8 +251,6 @@ fn fat_lto(cgcx: &CodegenContext<GccCodegenBackend>, diag_handler: &Handler, mod
     };
     let mut serialized_bitcode = Vec::new();
     {
-        let context = &module.module_llvm.context;
-        println!("Base module: {}", module.name);
         info!("using {:?} as a base module", module.name);
 
         // For all other modules we codegened we'll need to link them into our own
@@ -284,6 +283,7 @@ fn fat_lto(cgcx: &CodegenContext<GccCodegenBackend>, diag_handler: &Handler, mod
             info!("linking {:?}", name);
             match bc_decoded {
                 SerializedModule::Local(ref module_buffer) => {
+                    cgcx.backend.should_combine_object_files.store(true, Ordering::SeqCst);
                     module.module_llvm.context.add_driver_option(module_buffer.0.to_str().expect("path"));
                 },
                 SerializedModule::FromRlib(_) => unimplemented!("from rlib"),

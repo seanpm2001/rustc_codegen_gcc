@@ -1,3 +1,4 @@
+use std::sync::atomic::Ordering;
 use std::{env, fs};
 
 use gccjit::OutputKind;
@@ -20,8 +21,7 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
 
         let module_name = module.name.clone();
 
-        // FIXME: by adding a variable in CodegenContext.
-        let should_combine_object_files = module_name == "test_rust.8bd2b20a-cgu.0";
+        let should_combine_object_files = cgcx.backend.should_combine_object_files.load(Ordering::SeqCst);
 
         let module_name = Some(&module_name[..]);
 
@@ -50,16 +50,7 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
                 context.add_driver_option("-flto");
                 context.add_command_line_option("-flto-partition=one");
                 context.add_driver_option("-flto-partition=one");
-                if should_combine_object_files {
-                    unimplemented!(); // TODO: remove this line.
-                    context.add_driver_option("-Wl,-r");
-                    context.add_driver_option("-nostdlib");
-                    // NOTE: this doesn't actually generate an executable. With the above flags, it combines the .o files together in another .o.
-                    context.compile_to_file(OutputKind::Executable, obj_out.to_str().expect("path to str"));
-                }
-                else {
-                    context.compile_to_file(OutputKind::ObjectFile, bc_out.to_str().expect("path to str"));
-                }
+                context.compile_to_file(OutputKind::ObjectFile, bc_out.to_str().expect("path to str"));
             }
 
             if config.emit_obj == EmitObj::ObjectCode(BitcodeSection::Full) {
@@ -68,9 +59,6 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
                     .generic_activity_with_arg("GCC_module_codegen_embed_bitcode", &*module.name);
                 // TODO(antoyo): maybe we should call embed_bitcode to have the proper iOS fixes?
                 //embed_bitcode(cgcx, llcx, llmod, &config.bc_cmdline, data);
-                if should_combine_object_files {
-                    unimplemented!();
-                }
 
                 context.add_command_line_option("-flto");
                 context.add_driver_option("-flto");

@@ -66,6 +66,7 @@ mod type_;
 mod type_of;
 
 use std::any::Any;
+use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
 
 use gccjit::{Context, OptimizationLevel, CType};
@@ -105,6 +106,7 @@ impl<F: Fn() -> String> Drop for PrintOnPanic<F> {
 
 #[derive(Clone)]
 pub struct GccCodegenBackend {
+    should_combine_object_files: Arc<AtomicBool>,
     supports_128bit_integers: Arc<Mutex<bool>>,
 }
 
@@ -113,7 +115,7 @@ impl CodegenBackend for GccCodegenBackend {
         crate::DEFAULT_LOCALE_RESOURCE
     }
 
-    fn init(&self, sess: &Session) {
+    fn init(&self, _sess: &Session) {
         #[cfg(feature="master")]
         gccjit::set_global_personality_function_name(b"rust_eh_personality\0");
 
@@ -212,7 +214,7 @@ impl WriteBackendMethods for GccCodegenBackend {
     type ThinData = ();
     type ThinBuffer = ThinBuffer;
 
-    fn run_fat_lto(cgcx: &CodegenContext<Self>, mut modules: Vec<FatLTOInput<Self>>, cached_modules: Vec<(SerializedModule<Self::ModuleBuffer>, WorkProduct)>) -> Result<LtoModuleCodegen<Self>, FatalError> {
+    fn run_fat_lto(cgcx: &CodegenContext<Self>, modules: Vec<FatLTOInput<Self>>, cached_modules: Vec<(SerializedModule<Self::ModuleBuffer>, WorkProduct)>) -> Result<LtoModuleCodegen<Self>, FatalError> {
         back::lto::run_fat(cgcx, modules, cached_modules)
     }
 
@@ -259,6 +261,7 @@ impl WriteBackendMethods for GccCodegenBackend {
 #[no_mangle]
 pub fn __rustc_codegen_backend() -> Box<dyn CodegenBackend> {
     Box::new(GccCodegenBackend {
+        should_combine_object_files: Arc::new(AtomicBool::new(false)),
         supports_128bit_integers: Arc::new(Mutex::new(false)),
     })
 }
