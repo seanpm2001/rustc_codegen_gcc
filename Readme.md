@@ -182,6 +182,10 @@ set substitute-path /usr/src/debug/gcc /path/to/gcc-repo/gcc
 
 TODO(antoyo): but that's not what I remember I was doing.
 
+### How to debug GCC LTO
+
+Run do the command with `-v -save-temps` and then extract the `lto1` line from the output and run that under the debugger
+
 ### How to use a custom-build rustc
 
  * Build the stage2 compiler (`rustup toolchain link debug-current build/x86_64-unknown-linux-gnu/stage2`).

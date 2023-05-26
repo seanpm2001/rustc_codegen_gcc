@@ -2,19 +2,10 @@
 // => Maybe it's the symbol file?
 // => There's a least the rust_alloc file.
 //
-// TODO: vérifier si les symbols sont dans les fichiers .ltrans0.ltrans.o.
-// Ils ne sont pas là.
-//
-// FIXME: compile the object files (including the ones from sysroot) directly to the executable to see if this works.
-// TODO TODO TODO: WE'RE MAKING PROGRESS HERE!
-// Compiling with gcc and removing the -r flag compiles correctly!
-// For now, adding these environment variables is needed:
-// COLLECT_GCC=gcc GCC_EXEC_PREFIX=/opt/gcc/lib/gcc/x86_64-pc-linux-gnu
+// FIXME:
 // I had to copy lto1, crtbegin.o from the system to /opt/…
+// * sudo cp /usr/lib/gcc/x86_64-pc-linux-gnu/13.1.1/lto1 /opt/gcc/libexec/gcc/x86_64-pc-linux-gnu/13.1.0/lto1
 // I had to copy liblto_plugin.so to /opt/gcc/lib/gcc
-// I compile a .o as an executable.
-//
-// TODO: you do the command with -v -save-temps and then extract the lto1 line from the output and run that under the debugger
 
 use std::ffi::CString;
 use std::fs::{self, File};
@@ -284,7 +275,6 @@ fn fat_lto(cgcx: &CodegenContext<GccCodegenBackend>, diag_handler: &Handler, mod
         // above. Like above, though, we don't know much about the memory management
         // here so we err on the side of being save and persist everything with
         // the original module.
-        //let mut linker = Linker::new(context);
         for (bc_decoded, name) in serialized_modules {
             let _timer = cgcx
                 .prof
@@ -299,10 +289,6 @@ fn fat_lto(cgcx: &CodegenContext<GccCodegenBackend>, diag_handler: &Handler, mod
                 SerializedModule::FromRlib(_) => unimplemented!("from rlib"),
                 SerializedModule::FromUncompressedFile(_) => unimplemented!("from uncompressed file"),
             }
-            // let data = bc_decoded.data();
-            /*linker
-                .add(data)
-                .map_err(|()| write::llvm_err(diag_handler, LoadBitcode { name }))?;*/
             serialized_bitcode.push(bc_decoded);
         }
         save_temp_bitcode(cgcx, &module, "lto.input");
@@ -324,36 +310,6 @@ fn fat_lto(cgcx: &CodegenContext<GccCodegenBackend>, diag_handler: &Handler, mod
 
     Ok(LtoModuleCodegen::Fat { module, _serialized_bitcode: serialized_bitcode })
 }
-
-/*pub(crate) struct Linker<'a>(&'a mut llvm::Linker<'a>);
-
-impl<'a> Linker<'a> {
-    pub(crate) fn new(llmod: &'a llvm::Module) -> Self {
-        unsafe { Linker(llvm::LLVMRustLinkerNew(llmod)) }
-    }
-
-    pub(crate) fn add(&mut self, bytecode: &[u8]) -> Result<(), ()> {
-        unsafe {
-            if llvm::LLVMRustLinkerAdd(
-                self.0,
-                bytecode.as_ptr() as *const libc::c_char,
-                bytecode.len(),
-            ) {
-                Ok(())
-            } else {
-                Err(())
-            }
-        }
-    }
-}
-
-impl Drop for Linker<'_> {
-    fn drop(&mut self) {
-        unsafe {
-            llvm::LLVMRustLinkerFree(&mut *(self.0 as *mut _));
-        }
-    }
-}*/
 
 pub struct ModuleBuffer(PathBuf);
 

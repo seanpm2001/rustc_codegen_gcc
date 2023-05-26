@@ -88,7 +88,6 @@ pub fn compile_codegen_unit(tcx: TyCtxt<'_>, cgu_name: Symbol, supports_128bit_i
         // Instantiate monomorphizations without filling out definitions yet...
         //let llvm_module = ModuleLlvm::new(tcx, &cgu_name.as_str());
         let context = Context::default();
-        context.add_driver_option("-save-temps");
 
         context.add_command_line_option("-fexceptions");
         context.add_driver_option("-fexceptions");

@@ -20,8 +20,7 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
 
         let module_name = module.name.clone();
 
-        // println!("Module name: {}", module_name);
-        // let should_combine_object_files = module_name == "test_rust.3ab6d383-cgu.0"; // With debug info.
+        // FIXME: by adding a variable in CodegenContext.
         let should_combine_object_files = module_name == "test_rust.8bd2b20a-cgu.0";
 
         let module_name = Some(&module_name[..]);
@@ -43,28 +42,18 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
                 );
             }*/
 
-            // println!("{:?}: Emit bc: {}, Emit obj: {:?}", module_name, config.emit_bc, config.emit_obj == EmitObj::Bitcode);
-
             if config.emit_bc || config.emit_obj == EmitObj::Bitcode {
                 let _timer = cgcx
                     .prof
                     .generic_activity_with_arg("GCC_module_codegen_emit_bitcode", &*module.name);
-                // println!("Compiling {:?} with bitcode: {:?}", module_name, bc_out);
-                // FIXME FIXME FIXME: the undefined symbols might also be caused by not embedding the bitcode since the function is in asm.
-                // FIXME: some symbols like _RNvXsV_NtCsgpzv4I1UvGY_4core3fmtRNtNtNtB7_5alloc6layout6LayoutNtB5_5Debug3fmtCscFQYr8hhBzE_9hashbrown are defined in the object file, but not the *ltrans*.o object files.
-                // TODO TODO TODO: check if core::panicking::panic_bounds_check (_RNvNtCsgpzv4I1UvGY_4core9panicking18panic_bounds_check) is compiled with bitcode.
-                // TODO: so maybe we need ffat-objects here?
-                // TODO: use the flag -save-temps on a manual invoke of gcc to link to keep the *.ltrans*.o files and to inspect them.
                 context.add_command_line_option("-flto");
                 context.add_driver_option("-flto");
-                // TODO: use flto-partition=one?
                 context.add_command_line_option("-flto-partition=one");
                 context.add_driver_option("-flto-partition=one");
                 if should_combine_object_files {
                     unimplemented!(); // TODO: remove this line.
                     context.add_driver_option("-Wl,-r");
                     context.add_driver_option("-nostdlib");
-                    println!("Output file: {:?}", obj_out);
                     // NOTE: this doesn't actually generate an executable. With the above flags, it combines the .o files together in another .o.
                     context.compile_to_file(OutputKind::Executable, obj_out.to_str().expect("path to str"));
                 }
@@ -74,33 +63,6 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
             }
 
             if config.emit_obj == EmitObj::ObjectCode(BitcodeSection::Full) {
-                // FIXME: lto1 fails with the following error:
-                /*
-  = note: lto1: internal compiler error: decompressed stream: Destination buffer is too small
-          0x11e5a6b lto_uncompression_zstd
-          	../../../gcc/gcc/lto-compress.cc:171
-          0x11e5a6b lto_end_uncompression(lto_compression_stream*, lto_compression)
-          	../../../gcc/gcc/lto-compress.cc:406
-          0x11e4052 lto_get_section_data(lto_file_decl_data*, lto_section_type, char const*, int, unsigned long*, bool)
-          	../../../gcc/gcc/lto-section-in.cc:168
-          0xde7930 lto_file_finalize
-          	../../../gcc/gcc/lto/lto-common.cc:2280
-          0xde7930 lto_create_files_from_ids
-          	../../../gcc/gcc/lto/lto-common.cc:2298
-          0xde7930 lto_file_read
-          	../../../gcc/gcc/lto/lto-common.cc:2353
-          0xde7930 read_cgraph_and_symbols(unsigned int, char const**)
-          	../../../gcc/gcc/lto/lto-common.cc:2801
-          0xdcccdf lto_main()
-          	../../../gcc/gcc/lto/lto.cc:654
-          Please submit a full bug report, with preprocessed source (by using -freport-bug).
-          Please include the complete backtrace with any bug report.
-          See <https://gcc.gnu.org/bugs/> for instructions.
-          lto-wrapper: fatal error: cc returned 1 exit status
-          compilation terminated.
-          /usr/bin/ld: error: lto-wrapper failed
-          collect2: error: ld returned 1 exit status
-                */
                 let _timer = cgcx
                     .prof
                     .generic_activity_with_arg("GCC_module_codegen_embed_bitcode", &*module.name);
@@ -110,10 +72,8 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
                     unimplemented!();
                 }
 
-                // println!("Compiling {:?} with bitcode and asm: {:?}", module_name, bc_out);
                 context.add_command_line_option("-flto");
                 context.add_driver_option("-flto");
-                // TODO: use flto-partition=one?
                 context.add_command_line_option("-flto-partition=one");
                 context.add_driver_option("-flto-partition=one");
                 context.add_command_line_option("-ffat-lto-objects");
@@ -161,20 +121,15 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
                 if should_combine_object_files {
                     context.add_command_line_option("-flto");
                     context.add_driver_option("-flto");
-                    // TODO: use flto-partition=one?
                     context.add_command_line_option("-flto-partition=one");
                     context.add_driver_option("-flto-partition=one");
 
-                    // let inner = context.new_child_context();
-                    // context.add_driver_option("-v");
                     context.add_driver_option("-Wl,-r");
                     context.add_driver_option("-nostdlib");
                     context.add_driver_option("-fuse-linker-plugin");
 
-                    println!("Output file: {:?}", obj_out);
                     // NOTE: this doesn't actually generate an executable. With the above flags, it combines the .o files together in another .o.
                     context.compile_to_file(OutputKind::Executable, obj_out.to_str().expect("path to str"));
-                    // println!("After");
                 }
                 else {
                     context.compile_to_file(OutputKind::ObjectFile, obj_out.to_str().expect("path to str"));
@@ -188,7 +143,7 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
                 }
 
                 if !config.emit_bc {
-                    //debug!("removing_bitcode {:?}", bc_out);
+                    debug!("removing_bitcode {:?}", bc_out);
                     ensure_removed(diag_handler, &bc_out);
                 }
             }

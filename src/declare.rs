@@ -113,8 +113,6 @@ fn declare_raw_fn<'gcc>(cx: &CodegenCx<'gcc, '_>, name: &str, _callconv: () /*ll
                 .map(|(index, param)| cx.context.new_parameter(None, *param, &format!("param{}", index))) // TODO(antoyo): set name.
                 .collect();
             let func = cx.context.new_function(None, cx.linkage.get(), return_type, &params, mangle_name(name), variadic);
-            // TODO TODO TODO: seems like making functions externally_visible helps.
-            // func.add_attribute(FnAttribute::ExternallyVisible);
             cx.functions.borrow_mut().insert(name.to_string(), func);
             func
         };

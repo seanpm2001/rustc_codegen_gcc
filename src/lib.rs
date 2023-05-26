@@ -170,6 +170,7 @@ impl ExtraBackendMethods for GccCodegenBackend {
             context: Context::default(),
         };
 
+        // TODO: only set for x86.
         mods.context.add_command_line_option("-masm=intel");
         unsafe { allocator::codegen(tcx, &mut mods, module_name, kind, alloc_error_handler_kind); }
         mods
