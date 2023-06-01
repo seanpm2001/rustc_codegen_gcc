@@ -20,5 +20,4 @@ fi
 cmd=$1
 shift
 
-# FIXME: LIBRARY_PATH here is needed for crtbeginS.o, …
-LIBRARY_PATH=/home/bouanto/Ordinateur/Programmation/Projets/gcc-repo/gcc-build/build/gcc PATH=$PATH:/opt/gcc/bin RUSTDOCFLAGS="$RUSTFLAGS" cargo +${TOOLCHAIN} $cmd $@
+PATH=$PATH:/opt/gcc/bin RUSTDOCFLAGS="$RUSTFLAGS" cargo +${TOOLCHAIN} $cmd $@
