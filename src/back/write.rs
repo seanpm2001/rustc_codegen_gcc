@@ -46,8 +46,8 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
                 let _timer = cgcx
                     .prof
                     .generic_activity_with_arg("GCC_module_codegen_emit_bitcode", &*module.name);
-                context.add_command_line_option("-flto");
-                context.add_driver_option("-flto");
+                context.add_command_line_option("-flto=auto");
+                context.add_driver_option("-flto=auto");
                 context.add_command_line_option("-flto-partition=one");
                 context.add_driver_option("-flto-partition=one");
                 context.compile_to_file(OutputKind::ObjectFile, bc_out.to_str().expect("path to str"));
@@ -60,8 +60,8 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
                 // TODO(antoyo): maybe we should call embed_bitcode to have the proper iOS fixes?
                 //embed_bitcode(cgcx, llcx, llmod, &config.bc_cmdline, data);
 
-                context.add_command_line_option("-flto");
-                context.add_driver_option("-flto");
+                context.add_command_line_option("-flto=auto");
+                context.add_driver_option("-flto=auto");
                 context.add_command_line_option("-flto-partition=one");
                 context.add_driver_option("-flto-partition=one");
                 context.add_command_line_option("-ffat-lto-objects");
@@ -107,8 +107,8 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
                     context.dump_to_file(path, true);
                 }
                 if should_combine_object_files {
-                    context.add_command_line_option("-flto");
-                    context.add_driver_option("-flto");
+                    context.add_command_line_option("-flto=auto");
+                    context.add_driver_option("-flto=auto");
                     context.add_command_line_option("-flto-partition=one");
                     context.add_driver_option("-flto-partition=one");
 

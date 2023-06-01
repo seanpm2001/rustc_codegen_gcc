@@ -1,3 +1,8 @@
+// Fix these warnings:
+// /usr/bin/ld: warning: type of symbol `_RNvNvNvNtCs5JWOrf9uCus_5rayon11thread_pool19WORKER_THREAD_STATE7___getit5___KEY' changed from 1 to 6 in /tmp/ccKeUSiR.ltrans0.ltrans.o
+// /usr/bin/ld: warning: type of symbol `_RNvNvNvNvNtNtNtCsAj5i4SGTR7_3std4sync4mpmc5waker17current_thread_id5DUMMY7___getit5___KEY' changed from 1 to 6 in /tmp/ccKeUSiR.ltrans0.ltrans.o
+// /usr/bin/ld: warning: incremental linking of LTO and non-LTO objects; using -flinker-output=nolto-rel which will bypass whole program optimization
+//
 // FIXME: if any of object files in incremental link cannot be used for link-time optimization, the linker plugin issues a warning and uses nolto-rel.
 // => Maybe it's the symbol file?
 // => There's a least the rust_alloc file.
@@ -6,6 +11,15 @@
 // I had to copy lto1, crtbegin.o from the system to /opt/…
 // * sudo cp /usr/lib/gcc/x86_64-pc-linux-gnu/13.1.1/lto1 /opt/gcc/libexec/gcc/x86_64-pc-linux-gnu/13.1.0/lto1
 // I had to copy liblto_plugin.so to /opt/gcc/lib/gcc
+//
+// FIXME (should be fixed now): I could see this warning when I had an error:
+// warning: using serial compilation of 26 LTRANS jobs
+// lto-wrapper: note: see the '-flto' option documentation for more information
+//
+// strace shows that we still have those warnings:
+// [pid  8775] write(2, "lto-wrapper: warning: using seri"..., 65) = 65
+// [pid  8775] write(2, "lto-wrapper: note: see the '-flt"..., 77) = 77
+//
 
 use std::ffi::CString;
 use std::fs::{self, File};

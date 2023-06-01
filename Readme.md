@@ -88,6 +88,8 @@ $ CHANNEL="release" $cg_gccjit_dir/cargo.sh run
 
 If you compiled cg_gccjit in debug mode (aka you didn't pass `--release` to `./test.sh`) you should use `CHANNEL="debug"` instead or omit `CHANNEL="release"` completely.
 
+To use LTO, you need to set the variable `FAT_LTO` in addition to setting `lto = "fat"` in the `Cargo.toml`.
+
 ### Rustc
 
 > You should prefer using the Cargo method.
