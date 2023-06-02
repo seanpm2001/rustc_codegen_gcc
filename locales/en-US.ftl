@@ -2,7 +2,7 @@ codegen_gcc_unwinding_inline_asm =
     GCC backend does not support unwinding from inline asm
 
 codegen_gcc_lto_not_supported =
-    LTO is not supported. You may get a linker error.
+    Thin LTO is not supported. You may get a linker error.
 
 codegen_gcc_invalid_monomorphization_basic_integer =
     invalid monomorphization of `{$name}` intrinsic: expected basic integer type, found `{$ty}`

@@ -1,9 +1,9 @@
-// TODO: rebase on master.
-
 /*
  * TODO(antoyo): implement equality in libgccjit based on https://zpz.github.io/blog/overloading-equality-operator-in-cpp-class-hierarchy/ (for type equality?)
  * TODO(antoyo): support #[inline] attributes.
  * TODO(antoyo): support LTO (gcc's equivalent to Full LTO is -flto -flto-partition=one — https://documentation.suse.com/sbp/all/html/SBP-GCC-10/index.html).
+ * For Thin LTO, this might be helpful:
+ * In gcc 4.6 -fwhopr was removed and became default with -flto. The non-whopr path can still be executed via -flto-partition=none.
  *
  * TODO(antoyo): remove the patches.
  */
@@ -71,6 +71,7 @@ use std::any::Any;
 use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
 
+use errors::LTONotSupported;
 use gccjit::{Context, OptimizationLevel, CType};
 use rustc_ast::expand::allocator::AllocatorKind;
 use rustc_codegen_ssa::{CodegenResults, CompiledModule, ModuleCodegen};
@@ -86,7 +87,7 @@ use rustc_metadata::EncodedMetadata;
 use rustc_middle::dep_graph::{WorkProduct, WorkProductId};
 use rustc_middle::ty::TyCtxt;
 use rustc_middle::ty::query::Providers;
-use rustc_session::config::{OptLevel, OutputFilenames};
+use rustc_session::config::{Lto, OptLevel, OutputFilenames};
 use rustc_session::Session;
 use rustc_span::Symbol;
 use rustc_span::fatal_error::FatalError;
@@ -117,9 +118,12 @@ impl CodegenBackend for GccCodegenBackend {
         crate::DEFAULT_LOCALE_RESOURCE
     }
 
-    fn init(&self, _sess: &Session) {
+    fn init(&self, sess: &Session) {
         #[cfg(feature="master")]
         gccjit::set_global_personality_function_name(b"rust_eh_personality\0");
+        if sess.lto() == Lto::Thin {
+            sess.emit_warning(LTONotSupported {});
+        }
 
         let temp_dir = TempDir::new().expect("cannot create temporary directory");
         let temp_file = temp_dir.into_path().join("result.asm");
