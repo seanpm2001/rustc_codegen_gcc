@@ -1,3 +1,9 @@
+// TODO: do not embed the bitcode in the final binary.
+// It doesn't look like we try to generate fat objects for the final binary.
+// Check if the way we combine the object files make it keep the LTO sections on the final link.
+// FIXME: Maybe that's because the combined object files contain the IR (true) and the final link
+// does not remove it?
+//
 // FIXME:
 // fat-lto UI test fail with:
 // x86_64-pc-linux-gnu-gcc-13.1.0: fatal error: ‘-fuse-linker-plugin’, but liblto_plugin.so not found
@@ -10,6 +16,25 @@
 // FIXME: if any of object files in incremental link cannot be used for link-time optimization, the linker plugin issues a warning and uses nolto-rel.
 // => Maybe it's the symbol file?
 // => There's a least the rust_alloc file.
+// => There are also these files:
+//
+// Non claimed: /tmp/.tmpgTaub4/uncbv.f5023a46-cgu.0
+// Non claimed: /tmp/.tmpgTaub4/uncbv.f5023a46-cgu.1
+// Non claimed: /tmp/.tmpgTaub4/uncbv.f5023a46-cgu.10
+// Non claimed: /tmp/.tmpgTaub4/uncbv.f5023a46-cgu.11
+// Non claimed: /tmp/.tmpgTaub4/uncbv.f5023a46-cgu.12
+// Non claimed: /tmp/.tmpgTaub4/uncbv.f5023a46-cgu.13
+// Non claimed: /tmp/.tmpgTaub4/uncbv.f5023a46-cgu.14
+// Non claimed: /tmp/.tmpgTaub4/uncbv.f5023a46-cgu.15
+// Non claimed: /tmp/.tmpgTaub4/uncbv.f5023a46-cgu.2
+// Non claimed: /tmp/.tmpgTaub4/uncbv.f5023a46-cgu.4
+// Non claimed: /tmp/.tmpgTaub4/uncbv.f5023a46-cgu.5
+// Non claimed: /tmp/.tmpgTaub4/uncbv.f5023a46-cgu.6
+// Non claimed: /tmp/.tmpgTaub4/uncbv.f5023a46-cgu.7
+// Non claimed: /tmp/.tmpgTaub4/uncbv.f5023a46-cgu.8
+// Non claimed: /tmp/.tmpgTaub4/uncbv.f5023a46-cgu.9
+//
+// TODO: make sure the CGUs of the current project ^ are compiled with LTO.
 //
 // FIXME:
 // I had to copy lto1, crtbegin.o from the system to /opt/…
@@ -20,7 +45,7 @@
 // warning: using serial compilation of 26 LTRANS jobs
 // lto-wrapper: note: see the '-flto' option documentation for more information
 //
-// strace shows that we still have those warnings:
+// strace shows that we indeed had those warnings:
 // [pid  8775] write(2, "lto-wrapper: warning: using seri"..., 65) = 65
 // [pid  8775] write(2, "lto-wrapper: note: see the '-flt"..., 77) = 77
 //
@@ -30,7 +55,7 @@ use std::fs::{self, File};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 
-use gccjit::OutputKind;
+use gccjit::{OutputKind, OptimizationLevel};
 use object::read::archive::ArchiveFile;
 use rustc_codegen_ssa::back::lto::{LtoModuleCodegen, SerializedModule};
 use rustc_codegen_ssa::back::symbol_export;
@@ -280,7 +305,14 @@ fn fat_lto(cgcx: &CodegenContext<GccCodegenBackend>, diag_handler: &Handler, mod
             // TODO: add the proper file extension here?
             let path = tmp_path.path().to_path_buf().join(&module.name);
             let path = path.to_str().expect("path");
-            module.module_llvm.context.compile_to_file(OutputKind::ObjectFile, path);
+            let context = &module.module_llvm.context;
+            // TODO: do we need the optimization level here?
+            context.set_optimization_level(OptimizationLevel::Aggressive);
+            context.add_command_line_option("-flto=auto");
+            context.add_driver_option("-flto=auto");
+            context.add_command_line_option("-flto-partition=one");
+            context.add_driver_option("-flto-partition=one");
+            context.compile_to_file(OutputKind::ObjectFile, path);
             let buffer = ModuleBuffer::new(PathBuf::from(path));
             let llmod_id = CString::new(&module.name[..]).unwrap();
             serialized_modules.push((SerializedModule::Local(buffer), llmod_id));

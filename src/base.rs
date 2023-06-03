@@ -153,6 +153,10 @@ pub fn compile_codegen_unit(tcx: TyCtxt<'_>, cgu_name: Symbol, supports_128bit_i
             context.set_keep_intermediates(true);
         }
 
+        if env::var("CG_GCCJIT_VERBOSE").as_deref() == Ok("1") {
+            context.add_driver_option("-v");
+        }
+
         // NOTE: The codegen generates unrechable blocks.
         context.set_allow_unreachable_blocks(true);
 

@@ -46,6 +46,7 @@ pub(crate) unsafe fn codegen(cgcx: &CodegenContext<GccCodegenBackend>, diag_hand
                 let _timer = cgcx
                     .prof
                     .generic_activity_with_arg("GCC_module_codegen_emit_bitcode", &*module.name);
+                // TODO: deduplicate add_command_line_option and add_driver_option.
                 context.add_command_line_option("-flto=auto");
                 context.add_driver_option("-flto=auto");
                 context.add_command_line_option("-flto-partition=one");
