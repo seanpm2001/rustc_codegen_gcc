@@ -184,6 +184,17 @@ set substitute-path /usr/src/debug/gcc /path/to/gcc-repo/gcc
 
 TODO(antoyo): but that's not what I remember I was doing.
 
+### `failed to build archive` error
+
+When you get this error:
+
+```
+error: failed to build archive: failed to open object file: No such file or directory (os error 2)
+```
+
+That can be caused by the fact that you try to compile with `lto = "fat"`, but you didn't compile the sysroot with LTO.
+TODO: check this ^ .
+
 ### How to debug GCC LTO
 
 Run do the command with `-v -save-temps` and then extract the `lto1` line from the output and run that under the debugger
