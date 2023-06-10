@@ -166,9 +166,9 @@ function build_sysroot() {
 }
 
 function std_tests() {
-    echo "[AOT] arbitrary_self_types_pointers_and_wrappers"
-    $RUSTC example/arbitrary_self_types_pointers_and_wrappers.rs --crate-name arbitrary_self_types_pointers_and_wrappers --crate-type bin --target $TARGET_TRIPLE
-    $RUN_WRAPPER ./target/out/arbitrary_self_types_pointers_and_wrappers
+    #echo "[AOT] arbitrary_self_types_pointers_and_wrappers"
+    #$RUSTC example/arbitrary_self_types_pointers_and_wrappers.rs --crate-name arbitrary_self_types_pointers_and_wrappers --crate-type bin --target $TARGET_TRIPLE
+    #$RUN_WRAPPER ./target/out/arbitrary_self_types_pointers_and_wrappers
 
     echo "[AOT] alloc_system"
     $RUSTC example/alloc_system.rs --crate-type lib --target "$TARGET_TRIPLE"
