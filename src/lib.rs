@@ -6,6 +6,8 @@
  * In gcc 4.6 -fwhopr was removed and became default with -flto. The non-whopr path can still be executed via -flto-partition=none.
  *
  * Maybe some missing optizations enabled by rustc's LTO is in there: https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
+ * Like -fipa-icf (should be already enabled) and maybe -fdevirtualize-at-ltrans.
+ * TODO: disable debug info always being emitted. Perhaps this slows down things?
  *
  * TODO(antoyo): remove the patches.
  */
